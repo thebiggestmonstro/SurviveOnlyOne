@@ -14,4 +14,12 @@ class SURVIVEONLYONE_API ASOO_PlayerCharacter : public ASOO_Character
 {
 	GENERATED_BODY()
 	
+public:
+    ASOO_PlayerCharacter();
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    class USpringArmComponent* CameraBoom;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    class UCameraComponent* FollowCamera;
 };
