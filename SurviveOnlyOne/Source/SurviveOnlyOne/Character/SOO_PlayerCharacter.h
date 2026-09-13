@@ -22,4 +22,14 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     class UCameraComponent* FollowCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
+    class USOO_ActionComponent* ActionComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
+    class USOO_PawnInputComponent* PawnInputComponent;
+
+protected:
+    virtual void PossessedBy(AController* NewController) override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 };
