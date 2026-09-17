@@ -6,13 +6,23 @@
 #include "Player/Input/SOO_PawnInputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 
 ASOO_PlayerCharacter::ASOO_PlayerCharacter()
 {
+    if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+    {
+        MovementComp->bOrientRotationToMovement = true;
+    }
+
+    bUseControllerRotationYaw = false;
+    bUseControllerRotationPitch = false;
+    bUseControllerRotationRoll = false;
+
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
-    CameraBoom->TargetArmLength = 400.0f; 
+    CameraBoom->TargetArmLength = 500.0f; 
     CameraBoom->bUsePawnControlRotation = true; 
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -26,11 +36,6 @@ ASOO_PlayerCharacter::ASOO_PlayerCharacter()
 void ASOO_PlayerCharacter::PossessedBy(AController* NewController)
 {
     Super::PossessedBy(NewController); 
-
-    if (APlayerController* PC = Cast<APlayerController>(NewController))
-    {
-        PawnInputComponent->AddDefaultMappingContext(PC);
-    }
 }
 
 void ASOO_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

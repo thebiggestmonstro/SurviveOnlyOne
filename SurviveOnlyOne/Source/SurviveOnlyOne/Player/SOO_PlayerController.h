@@ -14,4 +14,9 @@ class SURVIVEONLYONE_API ASOO_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 };
