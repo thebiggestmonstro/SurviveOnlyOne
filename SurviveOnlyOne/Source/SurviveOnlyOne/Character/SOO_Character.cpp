@@ -2,10 +2,14 @@
 
 
 #include "Character/SOO_Character.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 ASOO_Character::ASOO_Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ASOO_Character::BeginPlay()

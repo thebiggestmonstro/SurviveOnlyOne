@@ -1,6 +1,3 @@
-// SOO_ActionComponent.h
-// Phase 3: GAS의 AbilitySystemComponent를 대체하는 경량 컴포넌트.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -29,6 +26,11 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Action")
 	bool IsActionActive(FGameplayTag ActionTag) const;
+
+	UFUNCTION(BlueprintPure, Category = "Action")
+	bool HasActiveTag(FGameplayTag Tag) const { return ActiveActionTags.HasTag(Tag); }
+
+	const FGameplayTagContainer& GetActiveTags() const { return ActiveActionTags; }
 
 protected:
 	virtual void BeginPlay() override;
