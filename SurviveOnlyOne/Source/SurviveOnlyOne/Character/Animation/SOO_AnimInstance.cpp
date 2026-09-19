@@ -37,6 +37,7 @@ void USOO_AnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	CachedVelocity = CachedMovementComponent->Velocity;
 	bCachedIsFalling = CachedMovementComponent->IsFalling();
+	bCachedIsCrouching = CachedMovementComponent->IsCrouching();
 	CachedActorRotation = CachedCharacter->GetActorRotation();
 }
 
@@ -50,6 +51,7 @@ void USOO_AnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	GroundSpeed = GroundVelocity.Size();
 	bIsMoving = GroundSpeed > 3.0f;
 	bIsFalling = bCachedIsFalling;
+	bIsCrouching = bCachedIsCrouching;
 
 	if (bIsMoving)
 	{

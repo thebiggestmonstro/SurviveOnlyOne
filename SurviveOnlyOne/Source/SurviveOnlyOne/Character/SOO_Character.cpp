@@ -4,12 +4,17 @@
 #include "Character/SOO_Character.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ASOO_Character::ASOO_Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	GetCharacterMovement()->CrouchedHalfHeight = 88.0f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
 }
 
 void ASOO_Character::BeginPlay()

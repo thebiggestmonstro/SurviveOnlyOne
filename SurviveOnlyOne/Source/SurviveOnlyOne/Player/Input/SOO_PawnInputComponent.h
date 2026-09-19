@@ -36,4 +36,5 @@ private:
 	void Input_Look(const FInputActionValue& Value);
 
 	void Input_AbilityTriggered(FGameplayTag InputTag);
+	void Input_AbilityReleased(FGameplayTag InputTag);
 };

@@ -69,6 +69,10 @@ void USOO_PawnInputComponent::SetupInputBindings(UEnhancedInputComponent* Enhanc
 			Entry.InputAction, ETriggerEvent::Started,
 			this, &USOO_PawnInputComponent::Input_AbilityTriggered, Entry.InputTag
 		);
+
+		EnhancedInputComponent->BindAction(
+			Entry.InputAction, ETriggerEvent::Completed,
+			this, &USOO_PawnInputComponent::Input_AbilityReleased, Entry.InputTag);
 	}
 }
 
@@ -115,5 +119,19 @@ void USOO_PawnInputComponent::Input_AbilityTriggered(FGameplayTag InputTag)
 	if (USOO_ActionComponent* ActionComp = OwnerPawn->FindComponentByClass<USOO_ActionComponent>())
 	{
 		ActionComp->TryActivateAction(InputTag);
+	}
+}
+
+void USOO_PawnInputComponent::Input_AbilityReleased(FGameplayTag InputTag)
+{
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (!OwnerPawn)
+	{
+		return;
+	}
+
+	if (USOO_ActionComponent* ActionComp = OwnerPawn->FindComponentByClass<USOO_ActionComponent>())
+	{
+		ActionComp->CancelAction(InputTag);
 	}
 }
