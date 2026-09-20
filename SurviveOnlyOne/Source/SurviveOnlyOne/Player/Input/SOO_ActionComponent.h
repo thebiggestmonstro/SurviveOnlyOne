@@ -32,6 +32,11 @@ public:
 
 	const FGameplayTagContainer& GetActiveTags() const { return ActiveActionTags; }
 
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	void NotifyActionEvent(FGameplayTag ActionTag, FName EventName);
+
+	void PlayReplicatedMontage(class UAnimMontage* Montage, float PlayRate);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -42,4 +47,10 @@ private:
 	FGameplayTagContainer ActiveActionTags;
 
 	bool IsBlocked(const USOO_PlayerActionBase* Action) const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerPlayMontage(class UAnimMontage* Montage, float PlayRate);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayMontage(class UAnimMontage* Montage, float PlayRate);
 };

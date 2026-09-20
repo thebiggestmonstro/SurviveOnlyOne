@@ -1,6 +1,3 @@
-// SOO_PlayerActionBase.h
-// Phase 3: GAS의 GameplayAbility를 대체하는 최소 인터페이스.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -27,6 +24,9 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	void Cancel(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	void HandleActionEvent(FName EventName, APawn* InstigatorPawn);
 
 	UFUNCTION(BlueprintPure, Category = "Action")
 	bool IsActive() const { return bIsActive; }
