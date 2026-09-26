@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/Input/SOO_ActionComponent.h"
+#include "Character/SOO_Character.h"
 
 void USOO_AnimInstance::NativeInitializeAnimation()
 {
@@ -38,6 +39,7 @@ void USOO_AnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	CachedVelocity = CachedMovementComponent->Velocity;
 	bCachedIsFalling = CachedMovementComponent->IsFalling();
 	bCachedIsCrouching = CachedMovementComponent->IsCrouching();
+	bCachedIsDown = Cast<ASOO_Character>(CachedCharacter)->IsCharacterDown();
 	CachedActorRotation = CachedCharacter->GetActorRotation();
 }
 
@@ -52,6 +54,7 @@ void USOO_AnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	bIsMoving = GroundSpeed > 3.0f;
 	bIsFalling = bCachedIsFalling;
 	bIsCrouching = bCachedIsCrouching;
+	bIsDown = bCachedIsDown;
 
 	if (bIsMoving)
 	{

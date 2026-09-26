@@ -43,6 +43,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	bool bIsCrouching = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	bool bIsDown = false;
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;                  
@@ -59,6 +62,7 @@ private:
 	FRotator CachedActorRotation = FRotator::ZeroRotator;
 	bool bCachedIsFalling = false;
 	bool bCachedIsCrouching = false;
+	bool bCachedIsDown = false;
 
 	void UpdateActionStateData();
 };

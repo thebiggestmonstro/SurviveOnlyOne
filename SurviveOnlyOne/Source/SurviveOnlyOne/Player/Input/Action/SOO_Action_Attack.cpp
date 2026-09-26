@@ -3,7 +3,10 @@
 
 #include "Player/Input/Action/SOO_Action_Attack.h"
 #include "Player/Input/SOO_ActionComponent.h"
+#include "Character/SOO_Character.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 bool USOO_Action_Attack::TryActivate_Implementation(APawn* InstigatorPawn)
 {
@@ -27,6 +30,11 @@ bool USOO_Action_Attack::TryActivate_Implementation(APawn* InstigatorPawn)
 		return false;
 	}
 
+	if (Cast<ASOO_Character>(InstigatorPawn)->IsCharacterDown())
+	{
+		return false;
+	}
+
 	ActionComponent->PlayReplicatedMontage(AttackMontage, AttackPlayRate);
 	bIsActive = true;
 	return true;
@@ -39,13 +47,19 @@ void USOO_Action_Attack::Cancel_Implementation(APawn* InstigatorPawn)
 
 void USOO_Action_Attack::HandleActionEvent_Implementation(FName EventName, APawn* InstigatorPawn)
 {
-	if (EventName == FName("AttackHit"))
+	if (EventName == FName("AttackWindow_Begin"))
 	{
-		PerformHitTrace(InstigatorPawn);
+		BeginSweepWindow(InstigatorPawn);
 		return;
 	}
 
-	if (EventName == FName("AttackEnd"))
+	if (EventName == FName("AttackWindow_Tick"))
+	{
+		TickSweepWindow(InstigatorPawn);
+		return;
+	}
+
+	if (EventName == FName("AttackWindow_End"))
 	{
 		bIsActive = false;
 		USOO_ActionComponent* ActionComponent = InstigatorPawn ? InstigatorPawn->FindComponentByClass<USOO_ActionComponent>() : nullptr;
@@ -64,12 +78,82 @@ void USOO_Action_Attack::HandleActionEvent_Implementation(FName EventName, APawn
 	}
 }
 
-void USOO_Action_Attack::PerformHitTrace(APawn* InstigatorPawn)
+FVector USOO_Action_Attack::GetCurrentFistLocation(APawn* InstigatorPawn) const
+{
+	return InstigatorPawn->GetActorLocation() + InstigatorPawn->GetActorForwardVector() * AttackRange;
+}
+
+void USOO_Action_Attack::BeginSweepWindow(APawn* InstigatorPawn)
 {
 	if (!InstigatorPawn || !InstigatorPawn->HasAuthority())
 	{
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("SOO_Action_Attack: AttackHit triggered by %s"), *InstigatorPawn->GetName());
+	AlreadyHitActorsThisSwing.Empty();
+
+	PrevFistLocation = GetCurrentFistLocation(InstigatorPawn);
+	bHasPrevFistLocation = true;
+}
+
+void USOO_Action_Attack::TickSweepWindow(APawn* InstigatorPawn)
+{
+	if (!InstigatorPawn || !InstigatorPawn->HasAuthority())
+	{
+		return;
+	}
+
+	if (!bHasPrevFistLocation)
+	{
+		BeginSweepWindow(InstigatorPawn);
+		return;
+	}
+
+	const FVector CurrentFistLocation = GetCurrentFistLocation(InstigatorPawn);
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(InstigatorPawn);
+
+	TArray<FHitResult> HitResults;
+	UKismetSystemLibrary::SphereTraceMulti(
+		InstigatorPawn,
+		PrevFistLocation,
+		CurrentFistLocation,
+		AttackRadius,
+		UEngineTypes::ConvertToTraceType(ECC_Pawn),
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		HitResults,
+		true
+	);
+
+	for (const FHitResult& Hit : HitResults)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (!HitActor || AlreadyHitActorsThisSwing.Contains(HitActor))
+		{
+			continue;
+		}
+		
+		ASOO_Character* HitCharacter = Cast<ASOO_Character>(HitActor);
+		if (!HitCharacter)
+		{
+			continue;
+		}
+
+		AlreadyHitActorsThisSwing.Add(HitActor);
+
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			1.0f,
+			InstigatorPawn->GetController(),
+			InstigatorPawn,
+			UDamageType::StaticClass()
+		);
+
+		UE_LOG(LogTemp, Log, TEXT("SOO_Action_Attack: %s hit %s"), *InstigatorPawn->GetName(), *HitActor->GetName());
+	}
+
+	PrevFistLocation = CurrentFistLocation;
 }
