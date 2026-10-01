@@ -34,7 +34,7 @@ protected:
 	bool bIsDown = false;
 
 	UFUNCTION()
-	void OnRep_IsDown();
+	virtual void OnRep_IsDown();
 
 	void HandleKnockdown(AController* EventInstigator, AActor* DamageCauser);
 };
