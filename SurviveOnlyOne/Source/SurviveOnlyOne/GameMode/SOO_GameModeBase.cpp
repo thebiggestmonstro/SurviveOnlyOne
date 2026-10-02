@@ -3,14 +3,25 @@
 
 #include "GameMode/SOO_GameModeBase.h"
 #include "AI/SOO_DecoyCharacter.h" 
+#include "Player/SOO_PlayerState.h"
+#include "Actor/SOO_TriggerActor.h"
+
 #include "GameFramework/PlayerStart.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
+#include "EngineUtils.h"
 
 void ASOO_GameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnDecoy(decoySpawnCount);
+
+	for (TActorIterator<ASOO_TriggerActor> It(GetWorld()); It; ++It)
+	{
+		++sunPilarCount;
+	}
 }
 
 void ASOO_GameModeBase::SpawnDecoy(int inDeocySpawnCount)
@@ -62,4 +73,117 @@ void ASOO_GameModeBase::SpawnDecoy(int inDeocySpawnCount)
 			SpawnParams
 		);
 	}
+}
+
+void ASOO_GameModeBase::OnPlayerDeath(ASOO_PlayerState* inPlayerState)
+{
+	if (!inPlayerState)
+	{
+		return;
+	}
+
+	if (!bIsGameOver) 
+	{
+		inPlayerState->bIsDead = true;
+
+		if (ASOO_PlayerState* Winner = GetWinner())
+		{
+			bIsGameOver = true;
+			UE_LOG(LogTemp, Warning, TEXT("Win by ALL KILL!!!"));
+			EndGame();
+		}
+	}
+}
+
+void ASOO_GameModeBase::OnTriggerActor(ASOO_PlayerState* inPlayerState, ASOO_TriggerActor* triggeredActor)
+{
+	if (inPlayerState == nullptr || triggeredActor == nullptr)
+	{
+		return;
+	}
+
+	if (!inPlayerState->SunPillars.Contains(triggeredActor))
+	{
+		inPlayerState->SunPillars.Add(triggeredActor);
+	}
+
+	if (!bIsGameOver)
+	{
+		if (ASOO_PlayerState* Winner = GetWinner())
+		{
+			bIsGameOver = true;
+			UE_LOG(LogTemp, Warning, TEXT("Win by Reaching ALL PILLARS!!!"));
+			EndGame();
+		}
+	}
+}
+
+int32 ASOO_GameModeBase::GetAliveCount() const
+{
+	int32 AliveCount = 0;
+
+	AGameStateBase* GS = GetGameState<AGameStateBase>();
+	if (!GS)
+	{
+		return AliveCount;
+	}
+
+	for (APlayerState* PS : GS->PlayerArray)
+	{
+		if (ASOO_PlayerState* SooPlayerState = Cast<ASOO_PlayerState>(PS))
+		{
+			if (!SooPlayerState->bIsDead)
+			{
+				++AliveCount;
+			}
+		}
+	}
+
+	return AliveCount;
+}
+
+ASOO_PlayerState* ASOO_GameModeBase::GetWinner() const
+{
+	AGameStateBase* GS = GetGameState<AGameStateBase>();
+	if (!GS)
+	{
+		return nullptr;
+	}
+
+	// Only 1 Player has survived
+	if (GetAliveCount() == 1) 
+	{
+		for (APlayerState* PS : GS->PlayerArray)
+		{
+			if (ASOO_PlayerState* SooPlayerState = Cast<ASOO_PlayerState>(PS))
+			{
+				if (!SooPlayerState->bIsDead)
+				{
+					return SooPlayerState;
+				}
+			}
+		}
+	}
+
+	// Some Player has rechead all SunPilars
+	for (APlayerState* PS : GS->PlayerArray)
+	{
+		if (ASOO_PlayerState* SooPlayerState = Cast<ASOO_PlayerState>(PS))
+		{
+			if (!SooPlayerState->bIsDead)
+			{
+				if (SooPlayerState->SunPillars.Num() == sunPilarCount)
+				{
+					return SooPlayerState;
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+void ASOO_GameModeBase::EndGame()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Game Finished !!!"));
 }

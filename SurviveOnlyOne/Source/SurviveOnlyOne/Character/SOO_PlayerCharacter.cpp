@@ -4,6 +4,8 @@
 #include "Character/SOO_PlayerCharacter.h"
 #include "Player/Input/SOO_ActionComponent.h"
 #include "Player/Input/SOO_PawnInputComponent.h"
+#include "Player/SOO_PlayerState.h"
+
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -31,6 +33,11 @@ ASOO_PlayerCharacter::ASOO_PlayerCharacter()
 
     ActionComponent = CreateDefaultSubobject<USOO_ActionComponent>(TEXT("ActionComponent"));
     PawnInputComponent = CreateDefaultSubobject<USOO_PawnInputComponent>(TEXT("PawnInputComponent"));
+}
+
+ASOO_PlayerState* ASOO_PlayerCharacter::GetPS() const
+{
+    return Cast<ASOO_PlayerState>(GetPlayerState());
 }
 
 void ASOO_PlayerCharacter::PossessedBy(AController* NewController)

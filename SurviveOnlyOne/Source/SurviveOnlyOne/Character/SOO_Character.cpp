@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/Input/SOO_ActionComponent.h" 
+#include "GameMode/SOO_GameModeBase.h"
+#include "Player/SOO_PlayerState.h"
 
 ASOO_Character::ASOO_Character()
 {
@@ -54,6 +56,14 @@ void ASOO_Character::HandleKnockdown(AController* EventInstigator, AActor* Damag
 	}
 
 	bIsDown = true; 
+
+	if (ASOO_PlayerState* PS = Cast<ASOO_PlayerState>(GetPlayerState()))
+	{
+		if (ASOO_GameModeBase* GM = GetWorld()->GetAuthGameMode<ASOO_GameModeBase>())
+		{
+			GM->OnPlayerDeath(PS);
+		}
+	}
 
 	OnRep_IsDown();
 

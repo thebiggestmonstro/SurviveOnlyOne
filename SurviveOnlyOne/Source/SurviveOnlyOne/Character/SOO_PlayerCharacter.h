@@ -6,6 +6,8 @@
 #include "Character/SOO_Character.h"
 #include "SOO_PlayerCharacter.generated.h"
 
+class ASOO_PlayerState;
+
 /**
  * 
  */
@@ -28,6 +30,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
     class USOO_PawnInputComponent* PawnInputComponent;
+
+    UFUNCTION(BlueprintPure, Category = "Player")
+    ASOO_PlayerState* GetPS() const;
 
 protected:
     virtual void PossessedBy(AController* NewController) override;
