@@ -6,9 +6,11 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+
 #include "Player/Input/SOO_ActionComponent.h" 
 #include "GameMode/SOO_GameModeBase.h"
 #include "Player/SOO_PlayerState.h"
+#include "Character/SOO_PlayerCharacter.h"
 
 ASOO_Character::ASOO_Character()
 {
@@ -57,12 +59,9 @@ void ASOO_Character::HandleKnockdown(AController* EventInstigator, AActor* Damag
 
 	bIsDown = true; 
 
-	if (ASOO_PlayerState* PS = Cast<ASOO_PlayerState>(GetPlayerState()))
+	if (ASOO_GameModeBase* GM = GetWorld()->GetAuthGameMode<ASOO_GameModeBase>())
 	{
-		if (ASOO_GameModeBase* GM = GetWorld()->GetAuthGameMode<ASOO_GameModeBase>())
-		{
-			GM->OnPlayerDeath(PS);
-		}
+		GM->OnCharacterDeath(Cast<ASOO_PlayerCharacter>(DamageCauser), this);
 	}
 
 	OnRep_IsDown();

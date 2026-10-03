@@ -7,6 +7,8 @@
 #include "SOO_GameModeBase.generated.h"
 
 class ASOO_DecoyCharacter;
+class ASOO_PlayerCharacter;
+class ASOO_Character;
 class ASOO_PlayerState;
 class ASOO_TriggerActor;
 
@@ -22,7 +24,7 @@ public:
 	UFUNCTION()
 	virtual void BeginPlay() override;
 
-	void OnPlayerDeath(ASOO_PlayerState* inPlayerState);
+	void OnCharacterDeath(ASOO_PlayerCharacter* inDamageCauser, ASOO_Character* inTarget);
 
 	void OnTriggerActor(ASOO_PlayerState* inPlayerState, ASOO_TriggerActor* triggeredActor);
 
@@ -43,6 +45,9 @@ private:
 	ASOO_PlayerState* GetWinner() const;
 
 	void EndGame();
+
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	ASOO_PlayerState* GetTopKillScore() const;
 
 	bool bIsGameOver;
 

@@ -22,4 +22,7 @@ public:
 
 	UPROPERTY()
 	TSet<TObjectPtr<ASOO_TriggerActor>> SunPillars;
+
+	UPROPERTY()
+	int killCount;
 };

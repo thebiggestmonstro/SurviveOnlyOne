@@ -5,6 +5,8 @@
 #include "AI/SOO_DecoyCharacter.h" 
 #include "Player/SOO_PlayerState.h"
 #include "Actor/SOO_TriggerActor.h"
+#include "Character/SOO_Character.h"
+#include "Character/SOO_PlayerCharacter.h"
 
 #include "GameFramework/PlayerStart.h"
 #include "NavigationSystem.h"
@@ -75,22 +77,35 @@ void ASOO_GameModeBase::SpawnDecoy(int inDeocySpawnCount)
 	}
 }
 
-void ASOO_GameModeBase::OnPlayerDeath(ASOO_PlayerState* inPlayerState)
+void ASOO_GameModeBase::OnCharacterDeath(ASOO_PlayerCharacter* inDamageCauser, ASOO_Character* inTarget)
 {
-	if (!inPlayerState)
+	if (inDamageCauser == nullptr || inTarget == nullptr)
 	{
 		return;
 	}
 
-	if (!bIsGameOver) 
-	{
-		inPlayerState->bIsDead = true;
+	// Attacker
+	ASOO_PlayerState* PS = inDamageCauser->GetPS();
+	PS->killCount++;
 
-		if (ASOO_PlayerState* Winner = GetWinner())
+	// Victim
+	if (ASOO_PlayerCharacter* TargetPlayerCharacter = Cast<ASOO_PlayerCharacter>(inTarget))
+	{
+		if (ASOO_PlayerState* TargetPS = TargetPlayerCharacter->GetPS())
 		{
-			bIsGameOver = true;
-			UE_LOG(LogTemp, Warning, TEXT("Win by ALL KILL!!!"));
-			EndGame();
+			if (bIsGameOver)
+			{
+				return;
+			}
+
+			TargetPS->bIsDead = true;
+
+			if (ASOO_PlayerState* Winner = GetWinner())
+			{
+				bIsGameOver = true;
+				UE_LOG(LogTemp, Warning, TEXT("Win by ALL KILL!!!"));
+				EndGame();
+			}
 		}
 	}
 }
@@ -185,5 +200,37 @@ ASOO_PlayerState* ASOO_GameModeBase::GetWinner() const
 
 void ASOO_GameModeBase::EndGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Game Finished !!!"));
+	if (GetTopKillScore() != nullptr)
+	{
+		ASOO_PlayerState* topKillScorePS = GetTopKillScore();
+		int32 topKillScore = topKillScorePS ? topKillScorePS->killCount : 0;
+
+		UE_LOG(LogTemp, Warning, TEXT("Max kill Score is %d !!!"), topKillScore);
+	}
+}
+
+ASOO_PlayerState* ASOO_GameModeBase::GetTopKillScore() const
+{
+	AGameStateBase* GS = GetGameState<AGameStateBase>();
+	if (!GS)
+	{
+		return nullptr;
+	}
+
+	ASOO_PlayerState* TopKiller = nullptr;
+	int32 HighestKillCount = -1;
+
+	for (APlayerState* PS : GS->PlayerArray)
+	{
+		if (ASOO_PlayerState* SooPlayerState = Cast<ASOO_PlayerState>(PS))
+		{
+			if (SooPlayerState->killCount > HighestKillCount)
+			{
+				HighestKillCount = SooPlayerState->killCount;
+				TopKiller = SooPlayerState;
+			}
+		}
+	}
+
+	return TopKiller;
 }
