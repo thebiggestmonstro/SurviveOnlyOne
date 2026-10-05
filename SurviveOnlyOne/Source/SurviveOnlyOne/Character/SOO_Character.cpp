@@ -21,6 +21,7 @@ ASOO_Character::ASOO_Character()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->CrouchedHalfHeight = 88.0f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 }
 
 void ASOO_Character::BeginPlay()
@@ -80,4 +81,28 @@ void ASOO_Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASOO_Character, bIsDown);
+	DOREPLIFETIME(ASOO_Character, CurrentSprintSpeed);
+}
+
+void ASOO_Character::ApplySprintSpeedHandicap(float NewSprintSpeed)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const float OldSprintSpeed = CurrentSprintSpeed;
+	CurrentSprintSpeed = NewSprintSpeed;
+	OnRep_SprintSpeed(OldSprintSpeed);
+}
+
+void ASOO_Character::OnRep_SprintSpeed(float OldSprintSpeed)
+{
+	if(UCharacterMovementComponent * Movement = GetCharacterMovement())
+	{
+		if (FMath::IsNearlyEqual(Movement->MaxWalkSpeed, OldSprintSpeed))
+		{
+			Movement->MaxWalkSpeed = CurrentSprintSpeed;
+		}
+	}
 }

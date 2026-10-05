@@ -29,6 +29,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintPure, Category = "Movement")
+	float GetCurrentSprintSpeed() const { return CurrentSprintSpeed; }
+
+	void ApplySprintSpeedHandicap(float NewSprintSpeed);
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_IsDown, BlueprintReadOnly, Category = "Knockdown")
 	bool bIsDown = false;
@@ -37,4 +42,10 @@ protected:
 	virtual void OnRep_IsDown();
 
 	void HandleKnockdown(AController* EventInstigator, AActor* DamageCauser);
+
+	UPROPERTY(ReplicatedUsing = OnRep_SprintSpeed, BlueprintReadOnly, Category = "Movement")
+	float CurrentSprintSpeed = 800.0f; 
+
+	UFUNCTION()
+	void OnRep_SprintSpeed(float OldSprintSpeed);
 };

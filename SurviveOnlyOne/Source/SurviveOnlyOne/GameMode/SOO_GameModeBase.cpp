@@ -120,6 +120,12 @@ void ASOO_GameModeBase::OnTriggerActor(ASOO_PlayerState* inPlayerState, ASOO_Tri
 	if (!inPlayerState->SunPillars.Contains(triggeredActor))
 	{
 		inPlayerState->SunPillars.Add(triggeredActor);
+
+		if (ASOO_Character* Character = Cast<ASOO_Character>(inPlayerState->GetPawn()))
+		{
+			const float NewSprintSpeed = FMath::Max(Character->GetCurrentSprintSpeed() - SpeedHandicapPerPillar, MinWalkSpeed);
+			Character->ApplySprintSpeedHandicap(NewSprintSpeed);
+		}
 	}
 
 	if (!bIsGameOver)

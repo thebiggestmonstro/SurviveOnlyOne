@@ -52,4 +52,10 @@ private:
 	bool bIsGameOver;
 
 	int sunPilarCount;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Handicap")
+	float SpeedHandicapPerPillar = 50.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Handicap")
+	float MinWalkSpeed = 300.0f;
 };

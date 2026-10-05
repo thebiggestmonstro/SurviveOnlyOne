@@ -63,6 +63,4 @@ private:
 	bool bCachedIsFalling = false;
 	bool bCachedIsCrouching = false;
 	bool bCachedIsDown = false;
-
-	void UpdateActionStateData();
 };

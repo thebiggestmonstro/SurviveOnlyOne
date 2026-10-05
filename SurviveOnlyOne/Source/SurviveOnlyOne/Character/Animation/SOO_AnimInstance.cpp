@@ -65,19 +65,4 @@ void USOO_AnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	{
 		Direction = 0.0f;
 	}
-
-	// AimPitch = DeltaRotation.Pitch;
-	// AimYaw = DeltaRotation.Yaw;
-}
-
-void USOO_AnimInstance::UpdateActionStateData()
-{
-	if (CachedCharacter)
-	{
-		if (const USOO_ActionComponent* ActionComponent = CachedCharacter->FindComponentByClass<USOO_ActionComponent>())
-		{
-			// bIsSprinting = SprintTag.IsValid() && ActionComponent->HasActiveTag(SprintTag);
-			// bIsAiming = AimTag.IsValid() && ActionComponent->HasActiveTag(AimTag);
-		}
-	}
 }

@@ -1,7 +1,9 @@
 #include "SOO_ActionComponent.h"
 #include "Action/SOO_PlayerActionBase.h"
+
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 
 USOO_ActionComponent::USOO_ActionComponent()
@@ -134,5 +136,40 @@ void USOO_ActionComponent::MulticastPlayMontage_Implementation(UAnimMontage* Mon
 	if (!OwnerCharacter->IsLocallyControlled())
 	{
 		OwnerCharacter->PlayAnimMontage(Montage, PlayRate);
+	}
+}
+
+void USOO_ActionComponent::RequestSetMaxWalkSpeed(float NewMaxWalkSpeed)
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	if (OwnerCharacter->HasAuthority())
+	{
+		if (UCharacterMovementComponent* Movement = OwnerCharacter->GetCharacterMovement())
+		{
+			Movement->MaxWalkSpeed = NewMaxWalkSpeed;
+		}
+	}
+	else
+	{
+		ServerSetMaxWalkSpeed(NewMaxWalkSpeed);
+	}
+}
+
+void USOO_ActionComponent::ServerSetMaxWalkSpeed_Implementation(float NewMaxWalkSpeed)
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	if (UCharacterMovementComponent* Movement = OwnerCharacter->GetCharacterMovement())
+	{
+		Movement->MaxWalkSpeed = NewMaxWalkSpeed;
 	}
 }

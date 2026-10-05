@@ -37,6 +37,8 @@ public:
 
 	void PlayReplicatedMontage(class UAnimMontage* Montage, float PlayRate);
 
+	void RequestSetMaxWalkSpeed(float NewMaxWalkSpeed);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -53,4 +55,7 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayMontage(class UAnimMontage* Montage, float PlayRate);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetMaxWalkSpeed(float NewMaxWalkSpeed);
 };
