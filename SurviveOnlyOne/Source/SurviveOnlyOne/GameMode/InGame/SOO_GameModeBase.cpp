@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameMode/SOO_GameModeBase.h"
+#include "GameMode/InGame/SOO_GameModeBase.h"
 #include "AI/SOO_DecoyCharacter.h" 
 #include "Player/SOO_PlayerState.h"
 #include "Actor/SOO_TriggerActor.h"

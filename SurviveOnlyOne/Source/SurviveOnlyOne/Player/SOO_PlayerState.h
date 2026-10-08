@@ -25,4 +25,6 @@ public:
 
 	UPROPERTY()
 	int killCount;
+
+	virtual void CopyProperties(APlayerState* PlayerState) override;
 };

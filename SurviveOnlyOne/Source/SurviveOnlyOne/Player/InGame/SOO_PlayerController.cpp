@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Player/SOO_PlayerController.h"
+#include "Player/InGame/SOO_PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 
 void ASOO_PlayerController::BeginPlay()

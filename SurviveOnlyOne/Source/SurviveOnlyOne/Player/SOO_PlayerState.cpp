@@ -3,3 +3,8 @@
 
 #include "Player/SOO_PlayerState.h"
 
+void ASOO_PlayerState::CopyProperties(APlayerState* PlayerState)
+{
+    Super::CopyProperties(PlayerState);
+
+}

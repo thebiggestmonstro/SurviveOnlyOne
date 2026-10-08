@@ -4,7 +4,7 @@
 #include "Actor/SOO_TriggerActor.h"
 #include "Player/SOO_PlayerState.h"
 #include "Character/SOO_PlayerCharacter.h"
-#include "GameMode/SOO_GameModeBase.h"
+#include "GameMode/InGame/SOO_GameModeBase.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
