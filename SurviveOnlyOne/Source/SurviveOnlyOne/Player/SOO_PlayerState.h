@@ -17,6 +17,17 @@ class SURVIVEONLYONE_API ASOO_PlayerState : public APlayerState
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION()
+	virtual void BeginPlay() override;
+
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+
+	void RefreshLobbyUI();
+
+	UFUNCTION()
+	void OnPlayerStateDestroyed(AActor* DestroyedActor);
+
+public:
 	UPROPERTY()
 	bool bIsDead;
 
@@ -25,6 +36,4 @@ public:
 
 	UPROPERTY()
 	int killCount;
-
-	virtual void CopyProperties(APlayerState* PlayerState) override;
 };
