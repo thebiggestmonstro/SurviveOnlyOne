@@ -16,4 +16,11 @@ class SURVIVEONLYONE_API ASOO_LobbyGameModeBase : public AGameModeBase
 	
 public:
 	ASOO_LobbyGameModeBase();
+
+	void TryStartGame();
+
+	bool CheckAllPlayerReady();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
+	FString LevelName;
 };

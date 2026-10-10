@@ -22,6 +22,8 @@ public:
 
 	virtual void CopyProperties(APlayerState* PlayerState) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void RefreshLobbyUI();
 
 	UFUNCTION()
@@ -36,4 +38,11 @@ public:
 
 	UPROPERTY()
 	int killCount;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsReady, Category = "Lobby")
+	bool bIsReady;
+
+private:
+	UFUNCTION()
+	void OnRep_IsReady();
 };

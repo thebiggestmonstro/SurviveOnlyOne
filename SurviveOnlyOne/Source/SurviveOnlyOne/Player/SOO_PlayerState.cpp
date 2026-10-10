@@ -5,6 +5,9 @@
 #include "Player/Lobby/SOO_LobbyPlayerController.h"
 #include "UI/Lobby/SOO_LobbyHUD.h"
 
+#include "Net/UnrealNetwork.h"
+
+
 void ASOO_PlayerState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -17,6 +20,12 @@ void ASOO_PlayerState::CopyProperties(APlayerState* PlayerState)
 {
     Super::CopyProperties(PlayerState);
 
+}
+
+void ASOO_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASOO_PlayerState, bIsReady);
 }
 
 void ASOO_PlayerState::RefreshLobbyUI()
@@ -37,6 +46,11 @@ void ASOO_PlayerState::RefreshLobbyUI()
 }
 
 void ASOO_PlayerState::OnPlayerStateDestroyed(AActor* DestroyedActor)
+{
+	RefreshLobbyUI();
+}
+
+void ASOO_PlayerState::OnRep_IsReady()
 {
 	RefreshLobbyUI();
 }

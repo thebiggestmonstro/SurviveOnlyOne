@@ -6,6 +6,13 @@
 
 void ASOO_PlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+
+	if (IsLocalController())
+	{
+		SetInputMode(FInputModeGameOnly());
+	}
+
 	if (!DefaultMappingContext)
 	{
 		return;
