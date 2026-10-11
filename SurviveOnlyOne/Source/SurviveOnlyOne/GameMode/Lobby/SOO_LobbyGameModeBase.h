@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "SOO_LobbyGameModeBase.generated.h"
 
+class APlayerController;
+
 /**
  * 
  */
@@ -17,10 +19,15 @@ class SURVIVEONLYONE_API ASOO_LobbyGameModeBase : public AGameModeBase
 public:
 	ASOO_LobbyGameModeBase();
 
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
 	void TryStartGame();
 
 	bool CheckAllPlayerReady();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
 	FString LevelName;
+
+	UPROPERTY()
+	int32 nickNameIndex;
 };

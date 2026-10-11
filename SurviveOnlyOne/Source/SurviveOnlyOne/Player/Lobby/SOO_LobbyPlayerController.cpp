@@ -32,3 +32,20 @@ void ASOO_LobbyPlayerController::ServerHandleReadyButton_Implementation()
 		GM->TryStartGame();
 	}
 }
+
+
+void ASOO_LobbyPlayerController::HandleChangeNickname(const FString& InNickName)
+{
+	ServerHandleChangeNickname(InNickName);
+}
+
+void ASOO_LobbyPlayerController::ServerHandleChangeNickname_Implementation(const FString& InNickName)
+{
+	ASOO_PlayerState* PS = GetPlayerState<ASOO_PlayerState>();
+	if (!PS)
+	{
+		return;
+	}
+
+	PS->NickName = InNickName;
+}

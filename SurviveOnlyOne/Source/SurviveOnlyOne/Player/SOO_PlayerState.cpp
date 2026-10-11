@@ -6,7 +6,7 @@
 #include "UI/Lobby/SOO_LobbyHUD.h"
 
 #include "Net/UnrealNetwork.h"
-
+#include "Kismet/GameplayStatics.h"
 
 void ASOO_PlayerState::BeginPlay()
 {
@@ -20,12 +20,18 @@ void ASOO_PlayerState::CopyProperties(APlayerState* PlayerState)
 {
     Super::CopyProperties(PlayerState);
 
+	ASOO_PlayerState* NewPlayerState = Cast<ASOO_PlayerState>(PlayerState);
+	if (NewPlayerState)
+	{
+		NewPlayerState->NickName = NickName;
+	}
 }
 
 void ASOO_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASOO_PlayerState, bIsReady);
+	DOREPLIFETIME(ASOO_PlayerState, NickName);
 }
 
 void ASOO_PlayerState::RefreshLobbyUI()
@@ -50,7 +56,20 @@ void ASOO_PlayerState::OnPlayerStateDestroyed(AActor* DestroyedActor)
 	RefreshLobbyUI();
 }
 
+void ASOO_PlayerState::GetKickedByServer_Implementation()
+{
+	UGameplayStatics::OpenLevel(
+		this,
+		FName(TEXT("Title"))
+	);
+}
+
 void ASOO_PlayerState::OnRep_IsReady()
+{
+	RefreshLobbyUI();
+}
+
+void ASOO_PlayerState::OnRep_NickName()
 {
 	RefreshLobbyUI();
 }

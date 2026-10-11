@@ -29,6 +29,9 @@ public:
 	UFUNCTION()
 	void OnPlayerStateDestroyed(AActor* DestroyedActor);
 
+	UFUNCTION(BlueprintCallable, Client, Reliable, Category = "Lobby")
+	void GetKickedByServer();
+
 public:
 	UPROPERTY()
 	bool bIsDead;
@@ -40,9 +43,15 @@ public:
 	int killCount;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsReady, Category = "Lobby")
-	bool bIsReady;
+	bool bIsReady;	
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_NickName, Category = "Player")
+	FString NickName;
 
 private:
 	UFUNCTION()
 	void OnRep_IsReady();
+
+	UFUNCTION()
+	void OnRep_NickName();
 };

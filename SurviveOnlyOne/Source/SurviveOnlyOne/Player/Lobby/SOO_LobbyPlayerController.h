@@ -20,4 +20,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerHandleReadyButton();
+
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void HandleChangeNickname(const FString& InNickName);
+
+	UFUNCTION(Server, Reliable)
+	void ServerHandleChangeNickname(const FString& InNickName);
 };

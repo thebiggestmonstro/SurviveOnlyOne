@@ -3,12 +3,26 @@
 
 #include "GameMode/Lobby/SOO_LobbyGameModeBase.h"
 #include "Player/SOO_PlayerState.h" 
-#include "GameFramework/GameStateBase.h"
 
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerController.h"
 
 ASOO_LobbyGameModeBase::ASOO_LobbyGameModeBase()
 {
 	bUseSeamlessTravel = true;
+}
+
+void ASOO_LobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	ASOO_PlayerState* PS = NewPlayer->GetPlayerState<ASOO_PlayerState>();
+
+	if (PS)
+	{
+		nickNameIndex++;
+		PS->NickName = FString::Printf(TEXT("User%d"), nickNameIndex);
+	}
 }
 
 void ASOO_LobbyGameModeBase::TryStartGame()
