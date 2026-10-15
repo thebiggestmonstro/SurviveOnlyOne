@@ -7,6 +7,7 @@
 #include "Actor/SOO_TriggerActor.h"
 #include "Character/SOO_Character.h"
 #include "Character/SOO_PlayerCharacter.h"
+#include "Game/SOO_GameInstance.h"
 
 #include "GameFramework/PlayerStart.h"
 #include "NavigationSystem.h"
@@ -18,6 +19,12 @@
 void ASOO_GameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
+	{
+		decoySpawnCount = GameInstance->MaxBotCount;
+	}
+
 	SpawnDecoy(decoySpawnCount);
 
 	for (TActorIterator<ASOO_TriggerActor> It(GetWorld()); It; ++It)
@@ -210,8 +217,9 @@ void ASOO_GameModeBase::EndGame()
 	{
 		ASOO_PlayerState* topKillScorePS = GetTopKillScore();
 		int32 topKillScore = topKillScorePS ? topKillScorePS->killCount : 0;
+		FString winnerName = topKillScorePS->NickName;
 
-		UE_LOG(LogTemp, Warning, TEXT("Max kill Score is %d !!!"), topKillScore);
+		UE_LOG(LogTemp, Warning, TEXT("%s is Winner!!!. Max kill Score is %d !!!"), *winnerName, topKillScore);
 	}
 }
 

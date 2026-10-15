@@ -25,9 +25,18 @@ public:
 
 	bool CheckAllPlayerReady();
 
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void SaveConfig(const FString& inLevelName, int32 inMaxPlayerCount, int32 inMaxBotCount);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
 	FString LevelName;
 
 	UPROPERTY()
-	int32 nickNameIndex;
+	int32 NickNameIndex;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
+	int32 MaxPlayerCount;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
+	int32 MaxBotCount;
 };
