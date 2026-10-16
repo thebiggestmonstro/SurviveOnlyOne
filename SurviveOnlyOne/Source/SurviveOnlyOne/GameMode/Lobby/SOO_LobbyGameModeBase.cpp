@@ -33,12 +33,6 @@ void ASOO_LobbyGameModeBase::TryStartGame()
 		return;
 	}
 
-	if (USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
-	{
-		GameInstance->MaxPlayerCount = MaxPlayerCount;
-		GameInstance->MaxBotCount = MaxBotCount;
-	}
-
 	if (UWorld* World = GetWorld())
 	{
 		World->ServerTravel(LevelName);
@@ -75,6 +69,12 @@ void ASOO_LobbyGameModeBase::SaveConfig(const FString& inLevelName, int32 inMaxP
 		LevelName = TEXT("Level_WaterWheel");
 	}
 
-	MaxPlayerCount = inMaxPlayerCount;
-	MaxBotCount = inMaxBotCount;
+	const int32 ClampedMaxPlayerCount = FMath::Clamp(inMaxPlayerCount, 3, 10);
+	const int32 ClampedMaxBotCount = FMath::Clamp(inMaxBotCount, 10, 30);
+
+	if (USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
+	{
+		GameInstance->MaxPlayerCount = ClampedMaxPlayerCount;
+		GameInstance->MaxBotCount = ClampedMaxBotCount;
+	}
 }

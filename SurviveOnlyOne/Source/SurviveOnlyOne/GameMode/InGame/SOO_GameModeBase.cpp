@@ -8,6 +8,7 @@
 #include "Character/SOO_Character.h"
 #include "Character/SOO_PlayerCharacter.h"
 #include "Game/SOO_GameInstance.h"
+#include "GameMode/InGame/SOO_GameStateBase.h"
 
 #include "GameFramework/PlayerStart.h"
 #include "NavigationSystem.h"
@@ -15,6 +16,11 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "EngineUtils.h"
+
+ASOO_GameModeBase::ASOO_GameModeBase()
+{
+	bUseSeamlessTravel = true;
+}
 
 void ASOO_GameModeBase::BeginPlay()
 {
@@ -33,6 +39,22 @@ void ASOO_GameModeBase::BeginPlay()
 	}
 }
 
+void ASOO_GameModeBase::RestartPlayer(AController* NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+
+	if (NewPlayer == nullptr)
+	{
+		return;
+	}
+
+	ASOO_PlayerCharacter* PlayerCharacter = Cast<ASOO_PlayerCharacter>(NewPlayer->GetPawn());
+	if (PlayerCharacter != nullptr)
+	{
+		MoveAtRandomLocation(PlayerCharacter);
+	}
+}
+
 void ASOO_GameModeBase::SpawnDecoy(int inDeocySpawnCount)
 {
 	UWorld* World = GetWorld();
@@ -41,46 +63,29 @@ void ASOO_GameModeBase::SpawnDecoy(int inDeocySpawnCount)
 		return;
 	}
 
-	TArray<AActor*> PlayerStarts;
-	UGameplayStatics::GetAllActorsOfClass(World, APlayerStart::StaticClass(), PlayerStarts);
+	TSubclassOf<ASOO_DecoyCharacter> ClassToSpawn = DecoyCharacterClass;
 
-	if (PlayerStarts.Num() == 0)
+	if (!ClassToSpawn)
 	{
-		return;
-	}
-
-	const FVector OriginLocation = PlayerStarts[0]->GetActorLocation();
-
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(World);
-	if (!NavSystem)
-	{
-		return;
+		ClassToSpawn = ASOO_DecoyCharacter::StaticClass();
 	}
 
 	for (int i = 0; i < inDeocySpawnCount; i++)
 	{
-		FNavLocation RandomNavLocation;
-		const bool bFound = NavSystem->GetRandomReachablePointInRadius(OriginLocation, 50000.0f, RandomNavLocation);
-		if (!bFound)
-		{
-			continue;
-		}
-
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		TSubclassOf<ASOO_DecoyCharacter> ClassToSpawn = DecoyCharacterClass;
-		if (!ClassToSpawn)
-		{
-			ClassToSpawn = ASOO_DecoyCharacter::StaticClass();
-		}
-
-		World->SpawnActor<ASOO_DecoyCharacter>(
+		ASOO_DecoyCharacter* Decoy = World->SpawnActor<ASOO_DecoyCharacter>(
 			ClassToSpawn,
-			RandomNavLocation.Location,
+			FVector::ZeroVector,
 			FRotator::ZeroRotator,
 			SpawnParams
 		);
+
+		if (Decoy)
+		{
+			MoveAtRandomLocation(Decoy);
+		}
 	}
 }
 
@@ -200,7 +205,7 @@ ASOO_PlayerState* ASOO_GameModeBase::GetWinner() const
 		{
 			if (!SooPlayerState->bIsDead)
 			{
-				if (SooPlayerState->SunPillars.Num() == sunPilarCount)
+				if (sunPilarCount > 0 && SooPlayerState->SunPillars.Num() == sunPilarCount)
 				{
 					return SooPlayerState;
 				}
@@ -213,14 +218,20 @@ ASOO_PlayerState* ASOO_GameModeBase::GetWinner() const
 
 void ASOO_GameModeBase::EndGame()
 {
-	if (GetTopKillScore() != nullptr)
+	ASOO_PlayerState* winnerPS = GetWinner();
+	ASOO_PlayerState* topKillerPS = GetTopKillScore();
+	if (winnerPS == nullptr || topKillerPS == nullptr)
 	{
-		ASOO_PlayerState* topKillScorePS = GetTopKillScore();
-		int32 topKillScore = topKillScorePS ? topKillScorePS->killCount : 0;
-		FString winnerName = topKillScorePS->NickName;
-
-		UE_LOG(LogTemp, Warning, TEXT("%s is Winner!!!. Max kill Score is %d !!!"), *winnerName, topKillScore);
+		return;
 	}
+
+	ASOO_GameStateBase* GS = GetGameState<ASOO_GameStateBase>();
+	if (GS != nullptr)
+	{
+		GS->Multicast_GameResult(winnerPS->NickName, topKillerPS->NickName, topKillerPS->killCount);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%s is Winner!!! Top killer is %s (%d kills)"), *winnerPS->NickName, *topKillerPS->NickName, topKillerPS->killCount);
 }
 
 ASOO_PlayerState* ASOO_GameModeBase::GetTopKillScore() const
@@ -247,4 +258,52 @@ ASOO_PlayerState* ASOO_GameModeBase::GetTopKillScore() const
 	}
 
 	return TopKiller;
+}
+
+void ASOO_GameModeBase::MoveAtRandomLocation(AActor* inActor)
+{
+	if (!inActor)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(
+		World,
+		APlayerStart::StaticClass(),
+		PlayerStarts
+	);
+
+	if (PlayerStarts.Num() == 0)
+	{
+		return;
+	}
+
+	const FVector OriginLocation = PlayerStarts[0]->GetActorLocation();
+
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(World);
+	if (!NavSystem)
+	{
+		return;
+	}
+
+	FNavLocation RandomNavLocation;
+	const bool bFound = NavSystem->GetRandomReachablePointInRadius(
+		OriginLocation,
+		50000.0f,
+		RandomNavLocation
+	);
+
+	if (!bFound)
+	{
+		return;
+	}
+
+	inActor->SetActorLocation(RandomNavLocation.Location);
 }

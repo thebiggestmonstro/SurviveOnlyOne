@@ -14,4 +14,10 @@ class SURVIVEONLYONE_API ASOO_GameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_GameResult(const FString& WinnerName, const FString& MaxKillerName, int32 MaxKillCount);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GameFlow")
+	void OnGameResult(const FString& WinnerName, const FString& MaxKillerName, int32 MaxKillCount);
 };

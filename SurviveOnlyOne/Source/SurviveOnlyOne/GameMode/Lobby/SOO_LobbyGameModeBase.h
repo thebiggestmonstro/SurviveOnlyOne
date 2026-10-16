@@ -33,10 +33,4 @@ public:
 
 	UPROPERTY()
 	int32 NickNameIndex;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
-	int32 MaxPlayerCount;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
-	int32 MaxBotCount;
 };

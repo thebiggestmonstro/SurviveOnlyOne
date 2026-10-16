@@ -16,8 +16,8 @@ class SURVIVEONLYONE_API USOO_GameInstance : public UGameInstance
 	
 public:
 	UPROPERTY()
-	int32 MaxPlayerCount;
+	int32 MaxPlayerCount = 3;
 
 	UPROPERTY()
-	int32 MaxBotCount;
+	int32 MaxBotCount = 10;
 };

@@ -21,8 +21,12 @@ class SURVIVEONLYONE_API ASOO_GameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	ASOO_GameModeBase();
+
 	UFUNCTION()
 	virtual void BeginPlay() override;
+
+	virtual void RestartPlayer(AController* NewPlayer) override;
 
 	void OnCharacterDeath(ASOO_PlayerCharacter* inDamageCauser, ASOO_Character* inTarget);
 
@@ -48,6 +52,8 @@ private:
 
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	ASOO_PlayerState* GetTopKillScore() const;
+
+	void MoveAtRandomLocation(AActor* inActor);
 
 	bool bIsGameOver;
 
