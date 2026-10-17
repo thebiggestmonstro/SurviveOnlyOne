@@ -48,4 +48,5 @@ void ASOO_LobbyPlayerController::ServerHandleChangeNickname_Implementation(const
 	}
 
 	PS->NickName = InNickName;
+	PS->RefreshLobbyUI();
 }
