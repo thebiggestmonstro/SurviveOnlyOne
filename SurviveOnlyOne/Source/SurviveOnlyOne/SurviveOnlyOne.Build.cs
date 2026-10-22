@@ -8,7 +8,21 @@ public class SurviveOnlyOne : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags", "AIModule", "NavigationSystem", "GameplayTasks" });
+		PublicDependencyModuleNames.AddRange(new string[] 
+        { 
+            "Core", 
+            "CoreUObject", 
+            "Engine", 
+            "InputCore", 
+            "EnhancedInput", 
+            "GameplayTags", 
+            "AIModule", 
+            "NavigationSystem", 
+            "GameplayTasks",
+            "OnlineSubsystem",
+            "OnlineSubsystemUtils",
+            "OnlineSubsystemSteam",
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

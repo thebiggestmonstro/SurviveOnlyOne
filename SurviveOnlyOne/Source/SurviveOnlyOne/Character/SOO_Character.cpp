@@ -19,7 +19,7 @@ ASOO_Character::ASOO_Character()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-	GetCharacterMovement()->CrouchedHalfHeight = 88.0f;
+	GetCharacterMovement()->SetCrouchedHalfHeight(88.0f);
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 }
