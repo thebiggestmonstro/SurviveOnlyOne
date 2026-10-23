@@ -54,6 +54,7 @@ void USOO_RoomListWidget::RefreshUI()
         {
             Rooms[Index]->SetVisibility(ESlateVisibility::Visible);
             FBlueprintSessionResult Result = SessionInfos[Index];
+            Rooms[Index]->SetInfo(Result);
         }
         else
         {
