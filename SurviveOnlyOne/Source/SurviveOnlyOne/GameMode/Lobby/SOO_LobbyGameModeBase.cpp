@@ -7,10 +7,19 @@
 
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
+#include "AdvancedSessionsLibrary.h"
+#include "UpdateSessionCallbackProxyAdvanced.h"
 
 ASOO_LobbyGameModeBase::ASOO_LobbyGameModeBase()
 {
 	bUseSeamlessTravel = true;
+}
+
+void ASOO_LobbyGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetLevel(TEXT("Fountain"));
 }
 
 void ASOO_LobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -60,6 +69,20 @@ bool ASOO_LobbyGameModeBase::CheckAllPlayerReady()
 
 void ASOO_LobbyGameModeBase::SaveConfig(const FString& inLevelName, int32 inMaxPlayerCount, int32 inMaxBotCount)
 {
+	SetLevel(inLevelName);
+
+	const int32 ClampedMaxPlayerCount = FMath::Clamp(inMaxPlayerCount, 3, 10);
+	const int32 ClampedMaxBotCount = FMath::Clamp(inMaxBotCount, 10, 30);
+
+	if (USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
+	{
+		GameInstance->MaxPlayerCount = ClampedMaxPlayerCount;
+		GameInstance->MaxBotCount = ClampedMaxBotCount;
+	}
+}
+
+void ASOO_LobbyGameModeBase::SetLevel(const FString& inLevelName)
+{
 	if (inLevelName.Equals(TEXT("Fountain"), ESearchCase::IgnoreCase))
 	{
 		LevelName = TEXT("Level_Fountain");
@@ -69,12 +92,57 @@ void ASOO_LobbyGameModeBase::SaveConfig(const FString& inLevelName, int32 inMaxP
 		LevelName = TEXT("Level_WaterWheel");
 	}
 
-	const int32 ClampedMaxPlayerCount = FMath::Clamp(inMaxPlayerCount, 3, 10);
-	const int32 ClampedMaxBotCount = FMath::Clamp(inMaxBotCount, 10, 30);
+	int32 NumConnections = 0;
+	int32 NumPrivateConnections = 0;
+	bool bIsLAN = false;
+	bool bIsDedicated = false;
+	bool bAllowInvites = false;
+	bool bAllowJoinInProgress = false;
+	bool bIsAnticheatEnabled = false;
+	int32 BuildUniqueID = 0;
+	TArray<FSessionPropertyKeyPair> ExtraSettings;
+	EBlueprintResultSwitch Result;
 
-	if (USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
+	UAdvancedSessionsLibrary::GetSessionSettings(
+		this,
+		NumConnections,
+		NumPrivateConnections,
+		bIsLAN,
+		bIsDedicated,
+		bAllowInvites,
+		bAllowJoinInProgress,
+		bIsAnticheatEnabled,
+		BuildUniqueID,
+		ExtraSettings,
+		Result
+	);
+
+	if (Result != EBlueprintResultSwitch::OnSuccess)
 	{
-		GameInstance->MaxPlayerCount = ClampedMaxPlayerCount;
-		GameInstance->MaxBotCount = ClampedMaxBotCount;
+		return;
+	}
+
+	TArray<FSessionPropertyKeyPair> NewOrChangedSettings;
+	NewOrChangedSettings.Add(UAdvancedSessionsLibrary::MakeLiteralSessionPropertyString(TEXT("MAP_NAME"), inLevelName));
+
+	TArray<FSessionPropertyKeyPair> ModifiedSettingsArray;
+	UAdvancedSessionsLibrary::AddOrModifyExtraSettings(ExtraSettings, NewOrChangedSettings, ModifiedSettingsArray);
+
+	UpdateSessionProxy = UUpdateSessionCallbackProxyAdvanced::UpdateSession(
+		this,                  // WorldContextObject
+		ModifiedSettingsArray, // Extra Settings
+		100,                   // Public Connections
+		0,                     // Private Connections
+		false,                 // Use LAN
+		false,                 // Allow Invites
+		true,                  // Allow Join in Progress
+		true,                  // Refresh Online Data
+		false,                 // Is Dedicated Server
+		true                   // Should Advertise
+	);
+
+	if (UpdateSessionProxy)
+	{
+		UpdateSessionProxy->Activate();
 	}
 }

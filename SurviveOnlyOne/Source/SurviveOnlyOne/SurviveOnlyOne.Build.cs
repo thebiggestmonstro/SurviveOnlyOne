@@ -22,6 +22,7 @@ public class SurviveOnlyOne : ModuleRules
             "OnlineSubsystem",
             "OnlineSubsystemUtils",
             "OnlineSubsystemSteam",
+            "AdvancedSessions",
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
