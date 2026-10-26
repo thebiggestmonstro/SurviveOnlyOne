@@ -7,6 +7,8 @@
 
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineSessionInterface.h"
 
 void ASOO_PlayerState::BeginPlay()
 {
@@ -58,10 +60,20 @@ void ASOO_PlayerState::OnPlayerStateDestroyed(AActor* DestroyedActor)
 
 void ASOO_PlayerState::GetKickedByServer_Implementation()
 {
-	UGameplayStatics::OpenLevel(
-		this,
-		FName(TEXT("Title"))
-	);
+	IOnlineSessionPtr Sessions;
+	if (IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get())
+	{
+		Sessions = Subsystem->GetSessionInterface();
+	}
+
+	if (Sessions.IsValid())
+	{
+		Sessions->DestroySession(NAME_GameSession, FOnDestroySessionCompleteDelegate::CreateUObject(this, &ASOO_PlayerState::OnDestroySessionComplete));
+	}
+	else
+	{
+		OnDestroySessionComplete(NAME_GameSession, false);
+	}
 }
 
 void ASOO_PlayerState::OnRep_IsReady()
@@ -72,4 +84,9 @@ void ASOO_PlayerState::OnRep_IsReady()
 void ASOO_PlayerState::OnRep_NickName()
 {
 	RefreshLobbyUI();
+}
+
+void ASOO_PlayerState::OnDestroySessionComplete(FName inSessionName, bool bWasSuccessful)
+{
+	UGameplayStatics::OpenLevel(this, FName(TEXT("Title")), true);
 }

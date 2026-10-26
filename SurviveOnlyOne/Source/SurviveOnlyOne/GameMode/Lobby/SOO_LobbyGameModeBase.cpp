@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AdvancedSessionsLibrary.h"
 #include "UpdateSessionCallbackProxyAdvanced.h"
+#include "StartSessionCallbackProxyAdvanced.h"
 
 ASOO_LobbyGameModeBase::ASOO_LobbyGameModeBase()
 {
@@ -20,6 +21,22 @@ void ASOO_LobbyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	SetLevel(TEXT("Fountain"));
+}
+
+void ASOO_LobbyGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+
+	if (!ErrorMessage.IsEmpty())
+	{
+		return;
+	}
+
+	const USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance());
+	if (GameInstance && GameState && GameState->PlayerArray.Num() >= GameInstance->MaxPlayerCount)
+	{
+		ErrorMessage = TEXT("Session is full");
+	}
 }
 
 void ASOO_LobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -42,9 +59,12 @@ void ASOO_LobbyGameModeBase::TryStartGame()
 		return;
 	}
 
-	if (UWorld* World = GetWorld())
+	StartSessionProxy = UStartSessionCallbackProxyAdvanced::StartAdvancedSession(this);
+
+	if (StartSessionProxy)
 	{
-		World->ServerTravel(LevelName);
+		StartSessionProxy->OnSuccess.AddDynamic(this, &ASOO_LobbyGameModeBase::OnStartSessionSuccess);
+		StartSessionProxy->Activate();
 	}
 }
 
@@ -69,8 +89,6 @@ bool ASOO_LobbyGameModeBase::CheckAllPlayerReady()
 
 void ASOO_LobbyGameModeBase::SaveConfig(const FString& inLevelName, int32 inMaxPlayerCount, int32 inMaxBotCount)
 {
-	SetLevel(inLevelName);
-
 	const int32 ClampedMaxPlayerCount = FMath::Clamp(inMaxPlayerCount, 3, 10);
 	const int32 ClampedMaxBotCount = FMath::Clamp(inMaxBotCount, 10, 30);
 
@@ -79,6 +97,8 @@ void ASOO_LobbyGameModeBase::SaveConfig(const FString& inLevelName, int32 inMaxP
 		GameInstance->MaxPlayerCount = ClampedMaxPlayerCount;
 		GameInstance->MaxBotCount = ClampedMaxBotCount;
 	}
+
+	SetLevel(inLevelName);
 }
 
 void ASOO_LobbyGameModeBase::SetLevel(const FString& inLevelName)
@@ -122,8 +142,15 @@ void ASOO_LobbyGameModeBase::SetLevel(const FString& inLevelName)
 		return;
 	}
 
+	int32 MaxPlayers = NumConnections;
+	if (const USOO_GameInstance* GameInstance = Cast<USOO_GameInstance>(GetGameInstance()))
+	{
+		MaxPlayers = GameInstance->MaxPlayerCount;
+	}
+
 	TArray<FSessionPropertyKeyPair> NewOrChangedSettings;
 	NewOrChangedSettings.Add(UAdvancedSessionsLibrary::MakeLiteralSessionPropertyString(TEXT("MAP_NAME"), inLevelName));
+	NewOrChangedSettings.Add(UAdvancedSessionsLibrary::MakeLiteralSessionPropertyInt(TEXT("MAX_PLAYERS"), MaxPlayers));
 
 	TArray<FSessionPropertyKeyPair> ModifiedSettingsArray;
 	UAdvancedSessionsLibrary::AddOrModifyExtraSettings(ExtraSettings, NewOrChangedSettings, ModifiedSettingsArray);
@@ -135,7 +162,7 @@ void ASOO_LobbyGameModeBase::SetLevel(const FString& inLevelName)
 		0,                     // Private Connections
 		false,                 // Use LAN
 		false,                 // Allow Invites
-		true,                  // Allow Join in Progress
+		false,                 // Allow Join in Progress
 		true,                  // Refresh Online Data
 		false,                 // Is Dedicated Server
 		true                   // Should Advertise
@@ -144,5 +171,13 @@ void ASOO_LobbyGameModeBase::SetLevel(const FString& inLevelName)
 	if (UpdateSessionProxy)
 	{
 		UpdateSessionProxy->Activate();
+	}
+}
+
+void ASOO_LobbyGameModeBase::OnStartSessionSuccess()
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->ServerTravel(LevelName);
 	}
 }

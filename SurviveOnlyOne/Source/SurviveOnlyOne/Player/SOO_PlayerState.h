@@ -54,4 +54,6 @@ private:
 
 	UFUNCTION()
 	void OnRep_NickName();
+
+	void OnDestroySessionComplete(FName inSessionName, bool bWasSuccessful);
 };

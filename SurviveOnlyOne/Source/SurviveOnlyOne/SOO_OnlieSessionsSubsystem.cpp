@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 
 USOO_OnlieSessionsSubsystem::USOO_OnlieSessionsSubsystem()
-	: CreateCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &USOO_OnlieSessionsSubsystem::OnCreate))
 {
 }
 
@@ -25,38 +24,11 @@ void USOO_OnlieSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	{
 		return;
 	}
-}
 
-void USOO_OnlieSessionsSubsystem::CreateSession()
-{
-	FNamedOnlineSession* ExistingSession = SessionManager->GetNamedSession(NAME_GameSession);
-	if (ExistingSession)
+	FString SubsystemName = OnlineSubsystem->GetSubsystemName().ToString();
+
+	if (GEngine)
 	{
-		SessionManager->DestroySession(NAME_GameSession);
-		return;
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, SubsystemName);
 	}
-
-	CreateCompleteDelegateHandle = SessionManager->AddOnCreateSessionCompleteDelegate_Handle(CreateCompleteDelegate);
-
-	FOnlineSessionSettings Settings;
-	Settings.NumPublicConnections = 10;
-	Settings.bShouldAdvertise = true;
-	Settings.bAllowJoinInProgress = true;
-	Settings.bIsLANMatch = true;
-	Settings.bUsesPresence = true;
-	Settings.bAllowJoinViaPresence = true;
-	Settings.bUseLobbiesIfAvailable = true;
-
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	SessionManager->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Settings);
-}
-
-void USOO_OnlieSessionsSubsystem::OnCreate(FName SessionName, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		UGameplayStatics::OpenLevel(this, "Lobby", true, FString("listen"));
-	}
-
-	SessionManager->ClearOnCreateSessionCompleteDelegate_Handle(CreateCompleteDelegateHandle);
 }

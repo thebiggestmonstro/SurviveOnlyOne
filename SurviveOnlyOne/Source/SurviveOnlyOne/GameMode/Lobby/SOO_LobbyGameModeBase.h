@@ -8,6 +8,7 @@
 
 class APlayerController;
 class UUpdateSessionCallbackProxyAdvanced;
+class UStartSessionCallbackProxyAdvanced;
 
 /**
  * 
@@ -22,6 +23,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
+
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	void TryStartGame();
@@ -33,6 +36,9 @@ public:
 
 	void SetLevel(const FString& inLevelName);
 
+	UFUNCTION()
+	void OnStartSessionSuccess();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lobby")
 	FString LevelName;
 
@@ -42,4 +48,7 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<UUpdateSessionCallbackProxyAdvanced> UpdateSessionProxy;
+
+	UPROPERTY()
+	TObjectPtr<UStartSessionCallbackProxyAdvanced> StartSessionProxy;
 };

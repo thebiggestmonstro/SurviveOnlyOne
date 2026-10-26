@@ -22,7 +22,8 @@ void USOO_RoomItemWidget::RefreshUI()
     Txt_MapName->SetText(FText::FromString(MapName));
 
     const int32 CurrentPlayers = Result.OnlineResult.Session.SessionSettings.NumPublicConnections - Result.OnlineResult.Session.NumOpenPublicConnections;
-    const int32 MaxPlayers = Result.OnlineResult.Session.SessionSettings.NumPublicConnections;
+    int32 MaxPlayers = 0;
+    Result.OnlineResult.Session.SessionSettings.Get(FName("MAX_PLAYERS"), OUT MaxPlayers);
     FString PlayerCountString = FString::Printf(TEXT("(%d / %d)"), CurrentPlayers, MaxPlayers);
     Txt_PlayerCount->SetText(FText::FromString(PlayerCountString));
 }

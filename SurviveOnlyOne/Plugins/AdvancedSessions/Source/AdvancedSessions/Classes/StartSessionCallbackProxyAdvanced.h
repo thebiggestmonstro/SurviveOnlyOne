@@ -4,8 +4,8 @@
 #include "BlueprintDataDefinitions.h"
 #include "StartSessionCallbackProxyAdvanced.generated.h"
 
-UCLASS(MinimalAPI)
-class UStartSessionCallbackProxyAdvanced : public UOnlineBlueprintCallProxyBase
+UCLASS()
+class ADVANCEDSESSIONS_API UStartSessionCallbackProxyAdvanced : public UOnlineBlueprintCallProxyBase
 {
 	GENERATED_UCLASS_BODY()
 	// Called when the session starts successfully

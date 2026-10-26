@@ -21,13 +21,6 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-public:
-	UFUNCTION(BlueprintCallable)
-	void CreateSession();
-
-private:
-	void OnCreate(FName SessionName, bool bWasSuccessful);
-
 private:
 	IOnlineSessionPtr SessionManager;
 
